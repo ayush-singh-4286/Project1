@@ -12,48 +12,84 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS  
     }
 });
+transporter.verify((error, success) => {
+    if (error) {
+        console.log("SMTP Error:", error);
+    } else {
+        console.log("SMTP Server Ready");
+    }
+});
 
 // 1. SEND OTP (FOR SIGNUP)
 exports.sendOTP = async (req, res) => {
     try {
+        console.log("1. Controller Hit");
+
         const { email } = req.body;
+        console.log("2. Email:", email);
+
         if (!email) {
             return res.status(400).json({ success: false, message: 'Please provide an email address.' });
         }
 
         const existingUser = await User.findOne({ email });
+        console.log("3. User Check Done");
+
         if (existingUser) {
             return res.status(400).json({ success: false, message: 'User already exists with this email.' });
         }
 
-        const generatedOtp = otpGenerator.generate(6, { 
-            upperCaseAlphabets: false, 
-            lowerCaseAlphabets: false, 
-            specialChars: false 
+        const generatedOtp = otpGenerator.generate(6, {
+            upperCaseAlphabets: false,
+            lowerCaseAlphabets: false,
+            specialChars: false
         });
+        console.log("4. OTP Generated");
 
         const otpRecord = new OTP({ email, otp: generatedOtp });
         await otpRecord.save();
+        console.log("5. OTP Saved");
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Mail is from Traveller_LOG',
-            html: `
-                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px; max-width: 500px;">
-                    <h2>Traveller_LOG Verification</h2>
-                    <p>Otp is given to complete the registration process:</p>
-                    <div style="background: #f4f4f9; padding: 15px; font-size: 24px; font-weight: bold; letter-spacing: 4px; text-align: center; color: #007bff; border-radius: 6px; margin: 20px 0;">
-                        ${generatedOtp}
-                    </div>
-                </div>
-            `
+            html: `<h2>Your OTP is ${generatedOtp}</h2>`
         };
 
-        await transporter.sendMail(mailOptions);
-        return res.status(200).json({ success: true, message: 'OTP sent successfully!' });
+        
+      console.log("Generated OTP:", generatedOtp);
+console.log("Sending to:", email);
+
+const info = await transporter.sendMail(mailOptions);
+
+console.log("MAIL INFO:", info);
+
+
+
+
+
+
+
+
+
+
+
+        console.log("6. Mail Sent");
+
+        return res.status(200).json({
+            success: true,
+            message: 'OTP sent successfully!'
+        });
+
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Failed to send OTP.', error: error.message });
+        console.log("ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to send OTP.',
+            error: error.message
+        });
     }
 };
 

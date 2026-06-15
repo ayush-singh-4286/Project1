@@ -24,37 +24,56 @@ const Login = () => {
     // TOGGLE ACCESS FOR LOGIN PASSWORD EYE
     const [showLoginPassword, setShowLoginPassword] = useState(false);
 
+   
     // TRIGGER 1: SEND OTP LOGIC FOR SIGNUP WITH SPAM FILTER WARNING ALERT
-    const handleSendOTP = async () => {
-        if (!email) {
-            setErrorMsg('Please enter an email address first.');
-            return;
-        }
-        setLoading(true);
-        setErrorMsg('');
-        try {
-            const res = await fetch('https://project1-backend-c6re.onrender.com/api/auth/send-otp', {
+const handleSendOTP = async () => {
+    console.log("Get OTP Button Clicked");
+
+    if (!email) {
+        setErrorMsg('Please enter an email address first.');
+        return;
+    }
+
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+        console.log("Before Fetch");
+
+        const res = await fetch(
+            'http://localhost:3000/api/auth/send-otp',
+            {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ email: email.trim() })
-            });
-            const data = await res.json();
-            if (res.ok && data.success) {
-                setOtpSent(true);
-                alert("📩 OTP Sent successfully!\n\n💡 Pro-Tip: If you don't see the email in your primary inbox, please check your SPAM or JUNK section also.");
-            } else {
-                setErrorMsg(data.message || 'Failed to dispatch verification OTP token.');
+                body: JSON.stringify({
+                    email: email.trim()
+                })
             }
-        } catch (err) {
-            setErrorMsg('Handshake failed. Backend server engine unresponsive.');
-        } finally {
-            setLoading(false);
-        }
-    };
+        );
 
+        console.log("After Fetch");
+        console.log("Status:", res.status);
+
+        const data = await res.json();
+        console.log("Response Data:", data);
+
+        if (res.ok && data.success) {
+            setOtpSent(true);
+            alert("📩 OTP Sent successfully!");
+        } else {
+            setErrorMsg(data.message || 'Failed to send OTP');
+        }
+
+    } catch (err) {
+        console.log("FETCH ERROR:", err);
+        setErrorMsg('Handshake failed. Backend server engine unresponsive.');
+    } finally {
+        setLoading(false);
+    }
+};
     // SUBMIT ACTIONS SELECTOR
     const handleSubmit = async (e) => {
         e.preventDefault();

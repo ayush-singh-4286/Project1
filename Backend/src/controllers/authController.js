@@ -5,22 +5,23 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
 
-// ==================== NODEMAILER CONFIGURATION FOR LIVE SERVER (PORT 587) ====================
+// ==================== NODEMAILER CONFIGURATION WITH IPV4 FORCE FIXED ====================
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587, // 👈 Render aur live servers ke liye universally open port
+    host: '74.125.142.108', // 🔥 FIXED: 'smtp.gmail.com' ka direct IPv4 address (Render ke IPv6 ENETUNREACH bug ko bypass karne ke liye)
+    port: 587,
     secure: false, 
+    requireTLS: true, // 🔥 Render network bypass ke liye zaroori hai
     auth: {
         user: process.env.EMAIL_USER, 
         pass: process.env.EMAIL_PASS  
     },
     tls: {
         rejectUnauthorized: false,
-        ciphers: 'SSLv3'
+        servername: 'smtp.gmail.com' // 👈 Isse SSL certificate validation fail nahi hoga IP use karne par bhi
     }
 });
 
-// Live startup logs checking
+// Live startup logs checking (Single optimized listener)
 transporter.verify((error, success) => {
     if (error) {
         console.log("❌ LIVE SMTP CONFIGURATION ERROR:", error);
@@ -177,7 +178,7 @@ exports.deletePost = async (req, res) => {
         const { postId } = req.params;
         
         const mongoose = require('mongoose');
-        // Aapne model ka naam small 'post' rakha hai, isliye hum use yahan dynamically check kar rahe hain
+        // 'post' small naming standard safety handler
         const PostModel = mongoose.models.post || mongoose.models.Post || mongoose.model('post');
         const deletedPost = await PostModel.findByIdAndDelete(postId);
         

@@ -26,7 +26,7 @@ const Profile = () => {
         const storedUsername = localStorage.getItem('username');
         const storedDob = localStorage.getItem('userDob');
         const storedGender = localStorage.getItem('userGender');
-        const storedEmail = localStorage.getItem('userEmail'); // Live session storage extraction
+        const storedEmail = localStorage.getItem('userEmail'); 
 
         if (!token) {
             alert("Access Denied! Please login first.");
@@ -34,10 +34,9 @@ const Profile = () => {
             return;
         }
 
-        // Mapping raw dynamic session attributes
         setUsername(storedUsername || 'Active Explorer');
         setGender(storedGender || 'Not Specified');
-        setEmail(storedEmail || ''); // 100% Pure dynamic layer - zero hardcoded fallbacks
+        setEmail(storedEmail || ''); 
 
         if (storedDob) {
             const dateObj = new Date(storedDob);
@@ -53,59 +52,59 @@ const Profile = () => {
             setDob('Not Specified');
         }
     }, []);
-const handlePasswordUpdate = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setError('');
 
-    if (newPassword !== confirmPassword) {
-        setError('Validation Mismatch: New password fields do not match.');
-        return;
-    }
+    const handlePasswordUpdate = async (e) => {
+        e.preventDefault();
+        setMessage('');
+        setError('');
 
-    setLoading(true);
-    const token = localStorage.getItem('token');
-    const currentActiveEmail = email || localStorage.getItem('userEmail');
-
-    if (!currentActiveEmail) {
-        setError('Authentication Error: Please re-login to update password.');
-        setLoading(false);
-        return;
-    }
-
-    try {
-       
-        const response = await fetch('http://localhost:3000/api/auth/update-password', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                email: currentActiveEmail.trim(), 
-                oldPassword: oldPassword,
-                newPassword: newPassword
-            })
-        });
-
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-            setMessage('✓ Password updated successfully!');
-            setOldPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-        } else {
-            setError(data.message || 'Server rejected the update.');
+        if (newPassword !== confirmPassword) {
+            setError('Validation Mismatch: New password fields do not match.');
+            return;
         }
-    } catch (err) {
-        // 🔥 Asli error console me dekhne ke liye:
-        console.error("Frontend Fetch Error:", err);
-        setError('Handshake Failure: Cannot connect to backend server. Check if backend is running.');
-    } finally {
-        setLoading(false);
-    }
-};
+
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        const currentActiveEmail = email || localStorage.getItem('userEmail');
+
+        if (!currentActiveEmail) {
+            setError('Authentication Error: Please re-login to update password.');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            // 🔥 FIXED: 'http://localhost:3000' ko hatakar tumhara live RENDER endpoint map kar diya hai
+            const response = await fetch('https://project1-backend-c6re.onrender.com/api/auth/update-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    email: currentActiveEmail.trim(), 
+                    oldPassword: oldPassword,
+                    newPassword: newPassword
+                })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                setMessage('✓ Password updated successfully!');
+                setOldPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+            } else {
+                setError(data.message || 'Server rejected the update.');
+            }
+        } catch (err) {
+            console.error("Frontend Fetch Error:", err);
+            setError('Handshake Failure: Cannot connect to backend server. Check network connection.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const theme = {
         bg: '#090d16',

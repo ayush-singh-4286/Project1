@@ -30,7 +30,6 @@ const Login = () => {
 
         if (isSignUp) {
             try {
-                // 🔥 FIXED: Yahan se OTP hatakar direct baseline parameters bhej rahe hain
                 const response = await fetch('https://project1-backend-c6re.onrender.com/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -41,7 +40,7 @@ const Login = () => {
                     alert('✓ Account deployed successfully! Please login with your credentials.');
                     setIsSignUp(false); 
                 } else {
-                    setErrorMsg(data.message || 'Registration pipeline configuration rejected.');
+                    setErrorMsg(data.message || 'Registration rejected.');
                 }
             } catch (err) {
                 setErrorMsg('Server connection breakdown during account creation.');
@@ -71,10 +70,10 @@ const Login = () => {
                     localStorage.setItem('userEmail', email); 
                     setTimeout(() => navigate('/landing'), 400);
                 } else {
-                    setErrorMsg(data.message || 'Security parameters match failed.');
+                    setErrorMsg(data.message || 'Invalid credentials.');
                 }
             } catch (err) {
-                setErrorMsg('Handshake failed. Encryption node unreachable.');
+                setErrorMsg('Handshake failed. Backend server unreachable.');
             } finally {
                 setLoading(false);
             }
@@ -108,15 +107,17 @@ const Login = () => {
             <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: '40px 30px', borderRadius: '24px', width: '100%', maxWidth: '440px', boxSizing: 'border-box', backdropFilter: 'blur(16px)', boxShadow: '0 20px 50px rgba(0,0,0,0.4)' }}>
                 
                 <h3 style={{ fontSize: '26px', fontWeight: '900', textAlign: 'center', margin: '0 0 6px 0', letterSpacing: '-0.5px' }}>Traveller_LOG</h3>
+                
+                {/* 🔥 IMAGE FIXED: Heading texts changed to simple style */}
                 <p style={{ color: theme.textMuted, fontSize: '13px', textAlign: 'center', margin: '0 0 24px 0' }}>
-                    {isSignUp ? 'Initialize account security onboarding parameters' : 'Access traveler database isolated environment'}
+                    {isSignUp ? 'Welcome! Let\'s set up your account' : 'Welcome Back! Please login to your account'}
                 </p>
 
                 {errorMsg && <div style={{ fontSize: '13px', color: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.05)', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', fontWeight: '600', border: '1px solid rgba(244, 63, 94, 0.1)' }}>{errorMsg}</div>}
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     
-                    {/* EMAIL INPUT FIELD (🔥 FIXED: Get OTP button completely removed) */}
+                    {/* EMAIL INPUT FIELD */}
                     <div style={{ width: '100%' }}>
                         <input 
                             type="email" 
@@ -128,12 +129,13 @@ const Login = () => {
                         />
                     </div>
 
-                    {/* SIGNUP ADDITIONAL INPUT LAYER (🔥 FIXED: OTP Input Box Completely Removed) */}
+                    {/* SIGNUP ADDITIONAL INPUT LAYER */}
                     {isSignUp && (
                         <>
+                            {/* 🔥 IMAGE FIXED: "Unique username tag" changed to "Enter username" */}
                             <input 
                                 type="text" 
-                                placeholder="Unique Username Tag" 
+                                placeholder="Enter username" 
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 required
@@ -156,9 +158,10 @@ const Login = () => {
 
                     {/* PASSWORD CONTAINER WITH SHOW/HIDE ACTION */}
                     <div style={{ position: 'relative', width: '100%' }}>
+                        {/* 🔥 IMAGE FIXED: Passwords placeholder changes according to login/signup */}
                         <input 
                             type={showLoginPassword ? "text" : "password"} 
-                            placeholder={isSignUp ? "Define Access Password" : "Security Password"} 
+                            placeholder={isSignUp ? "Enter Password" : "Place Enter password"} 
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
@@ -173,21 +176,19 @@ const Login = () => {
                         </button>
                     </div>
                     
-                    {!isSignUp && (
-                        <div style={{ textAlign: 'right', marginTop: '-6px' }}>
-                            <span onClick={() => navigate('/forgot-password')} style={{ color: '#38bdf8', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>Forgot password?</span>
-                        </div>
-                    )}
+                   
 
+                    {/* 🔥 IMAGE FIXED: Buttons text changed to "Create Accout" and "Login" */}
                     <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)', color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)', marginTop: '8px' }}>
-                        {loading ? 'Processing Workspace Hook...' : isSignUp ? 'Compile & Initialize Account' : 'Authorize Login Entry'}
+                        {loading ? 'Processing...' : isSignUp ? 'Create Accout' : 'Login'}
                     </button>
                 </form>
 
+                {/* 🔥 IMAGE FIXED: Lower toggle links labels updated */}
                 <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '14px', color: theme.textMuted }}>
-                    {isSignUp ? 'Already mapped into index?' : 'New explorer track?'} {' '}
+                    {isSignUp ? 'Already have an account?' : 'First time here?'} {' '}
                     <span onClick={() => { setIsSignUp(!isSignUp); setErrorMsg(''); }} style={{ color: theme.accent, fontWeight: '700', cursor: 'pointer' }}>
-                        {isSignUp ? 'Authorize Login' : 'Initialize Account'}
+                        {isSignUp ? 'Login here' : 'Create Account'}
                     </span>
                 </div>
             </div>

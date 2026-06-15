@@ -233,7 +233,7 @@ const LandingPage = () => {
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
     });
 
-    if (loading) return <div style={{ color: '#fff', textAlign: 'center', padding: '100px', backgroundColor: theme.bg }}>Syncing workspace...</div>;
+    if (loading) return <div style={{ color: '#fff', textAlign: 'center', padding: '100px', backgroundColor: theme.bg }}>Going back to home...</div>;
 
     const extractFolderSummary = (postsArray) => {
         if (!postsArray || postsArray.length === 0) return 'No summary data compiled.';
@@ -475,7 +475,7 @@ const LandingPage = () => {
                                 <input type="file" accept="image/*" required onChange={(e) => setMainImageFile(e.target.files[0])} style={{ display: 'none' }} id="main-modal-upload" />
                                 <label htmlFor="main-modal-upload" style={{ cursor: 'pointer', fontSize: '13px', color: '#38bdf8', fontWeight: '700' }}>{mainImageFile ? `✓ ${mainImageFile.name}` : '📂 ATTACH ALBUM COVER PHOTO'}</label>
                             </div>
-                            <button type="submit" disabled={mainUploading} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)', color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>{mainUploading ? 'Syncing transmission layer...' : 'Compile Asset Cluster'}</button>
+                            <button type="submit" disabled={mainUploading} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)', color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>{mainUploading ? 'Syncing transmission layer...' : 'Upload images'}</button>
                         </form>
                     </div>
                 </div>

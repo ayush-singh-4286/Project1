@@ -74,7 +74,7 @@ const TravelDashboard = () => {
         transition: 'all 0.3s ease'
     };
 
-    if (loading) return <div style={{ color: '#fff', textAlign: 'center', padding: '100px', backgroundColor: theme.bg }}>Syncing matrix nodes...</div>;
+    if (loading) return <div style={{ color: '#fff', textAlign: 'center', padding: '100px', backgroundColor: theme.bg }}>Wait for a while...</div>;
 
     return (
         <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: theme.textMain, fontFamily: "'Urbanist', sans-serif", padding: '0 0 40px 0', boxSizing: 'border-box' }}>

@@ -125,7 +125,7 @@ const CreatePost = () => {
                   Traveller_LOG
                 </div>
                 
-                <div style={{ fontSize: '16px', fontWeight: '700' }}>Ingestion Gateway Pipeline</div>
+                <div style={{ fontSize: '16px', fontWeight: '700' }}>Media Control Center</div>
 
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <button style={navBtnStyle} onClick={() => navigate('/landing')}>Home</button>
@@ -137,7 +137,7 @@ const CreatePost = () => {
 
             <div style={{ maxWidth: '600px', margin: '40px auto 0 auto', padding: '0 20px' }}>
                 <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '24px', padding: '30px', backdropFilter: 'blur(16px)' }}>
-                    <h3 style={{ fontSize: '20px', fontWeight: '700', margin: '0 0 24px 0' }}>Log New Memory</h3>
+                    <h3 style={{ fontSize: '20px', fontWeight: '700', margin: '0 0 24px 0' }}>Uploading Photos...!!!</h3>
 
                     <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         
@@ -187,12 +187,12 @@ const CreatePost = () => {
                         <div style={{ border: `1px dashed ${theme.accent}`, borderRadius: '10px', padding: '20px', textAlign: 'center', cursor: 'pointer' }}>
                             <input type="file" accept="image/*" required onChange={(e) => setImageFile(e.target.files[0])} style={{ display: 'none' }} id="upload-binary" />
                             <label htmlFor="upload-binary" style={{ cursor: 'pointer', fontSize: '14px', color: theme.accent, fontWeight: '700' }}>
-                                {imageFile ? `✓ ${imageFile.name}` : '📂 CHOOSE BINARY IMAGE'}
+                                {imageFile ? `✓ ${imageFile.name}` : '📂 CHOOSE  IMAGE'}
                             </label>
                         </div>
 
                         <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)', color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>
-                            {loading ? 'Transmitting Assets...' : 'Commit Path Entry'}
+                            {loading ? 'Transmitting Assets...' : 'Save changes'}
                         </button>
                     </form>
                 </div>

@@ -1,6 +1,5 @@
 const User = require('../models/User'); 
 const OTP = require('../models/OTP'); 
-const Post = require('../models/Post'); // 🔥 FIXED: ChatGPT ke mutabik Post model import kar diya takki deletePost crash na ho!
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -172,12 +171,15 @@ exports.login = async (req, res) => {
     }
 };
 
-// 4. DELETE AN EXISTING POST BY ID
+// 4. DELETE AN EXISTING POST BY ID (Fixed to dynamic check without top import crash)
 exports.deletePost = async (req, res) => {
     try {
         const { postId } = req.params;
         
-        const deletedPost = await Post.findByIdAndDelete(postId);
+        const mongoose = require('mongoose');
+        // Aapne model ka naam small 'post' rakha hai, isliye hum use yahan dynamically check kar rahe hain
+        const PostModel = mongoose.models.post || mongoose.models.Post || mongoose.model('post');
+        const deletedPost = await PostModel.findByIdAndDelete(postId);
         
         if (!deletedPost) {
             return res.status(404).json({ success: false, message: 'Post memory not found in index.' });

@@ -41,7 +41,7 @@ const handleSendOTP = async () => {
         console.log("Before Fetch");
 
         const res = await fetch(
-            'http://localhost:3000/api/auth/send-otp',
+            'https://project1-backend-c6re.onrender.com/api/auth/send-otp',
             {
                 method: 'POST',
                 headers: {

@@ -1,23 +1,23 @@
 const User = require('../models/User'); 
 const OTP = require('../models/OTP'); 
+const Post = require('../models/Post'); // 🔥 FIXED: ChatGPT ke mutabik Post model import kar diya takki deletePost crash na ho!
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
 
-// ==================== NODEMAILER CONFIGURATION FOR LIVE SERVER ====================
+// ==================== NODEMAILER CONFIGURATION FOR LIVE SERVER (PORT 587) ====================
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // TLS/SSL Handshake mandatory for Render
+    port: 587, // 👈 Render aur live servers ke liye universally open port
+    secure: false, 
     auth: {
         user: process.env.EMAIL_USER, 
         pass: process.env.EMAIL_PASS  
     },
-    // 🔥 YEH LIVE PRODUCTION MEIN GMAIL BLOCK HO NE SE BACHAYEGA
     tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        ciphers: 'SSLv3'
     }
 });
 

@@ -5,20 +5,31 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
 
+// ==================== NODEMAILER CONFIGURATION FOR LIVE SERVER ====================
 const transporter = nodemailer.createTransport({
     service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // TLS/SSL Handshake mandatory for Render
     auth: {
         user: process.env.EMAIL_USER, 
         pass: process.env.EMAIL_PASS  
+    },
+    // 🔥 YEH LIVE PRODUCTION MEIN GMAIL BLOCK HO NE SE BACHAYEGA
+    tls: {
+        rejectUnauthorized: false
     }
 });
+
+// Live startup logs checking
 transporter.verify((error, success) => {
     if (error) {
-        console.log("SMTP Error:", error);
+        console.log("❌ LIVE SMTP CONFIGURATION ERROR:", error);
     } else {
-        console.log("SMTP Server Ready");
+        console.log("✅ LIVE SMTP SERVER READY TO SEND MAILS");
     }
 });
+// =================================================================================
 
 // 1. SEND OTP (FOR SIGNUP)
 exports.sendOTP = async (req, res) => {
@@ -57,24 +68,11 @@ exports.sendOTP = async (req, res) => {
             html: `<h2>Your OTP is ${generatedOtp}</h2>`
         };
 
-        
-      console.log("Generated OTP:", generatedOtp);
-console.log("Sending to:", email);
+        console.log("Generated OTP:", generatedOtp);
+        console.log("Sending to:", email);
 
-const info = await transporter.sendMail(mailOptions);
-
-console.log("MAIL INFO:", info);
-
-
-
-
-
-
-
-
-
-
-
+        const info = await transporter.sendMail(mailOptions);
+        console.log("MAIL INFO:", info);
         console.log("6. Mail Sent");
 
         return res.status(200).json({
@@ -83,7 +81,7 @@ console.log("MAIL INFO:", info);
         });
 
     } catch (error) {
-        console.log("ERROR:", error);
+        console.log("❌ ERROR IN SENDING OTP:", error);
 
         return res.status(500).json({
             success: false,
@@ -135,7 +133,7 @@ exports.signup = async (req, res) => {
     }
 };
 
-// 3. LOGIN (🔥 FIXED: Appending dynamic DOB and Gender fields to the payload response)
+// 3. LOGIN
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -165,8 +163,8 @@ exports.login = async (req, res) => {
                 id: user._id, 
                 email: user.email, 
                 username: user.username,
-                dob: user.dob,     // 👈 Pass to local storage pipeline
-                gender: user.gender // 👈 Pass to local storage pipeline
+                dob: user.dob,     
+                gender: user.gender 
             } 
         });
     } catch (error) {
@@ -174,12 +172,11 @@ exports.login = async (req, res) => {
     }
 };
 
-// 🔥 NEW FUNCTION: DELETE AN EXISTING POST BY ID
+// 4. DELETE AN EXISTING POST BY ID
 exports.deletePost = async (req, res) => {
     try {
         const { postId } = req.params;
         
-        // Database se post dhoodh kar delete karo
         const deletedPost = await Post.findByIdAndDelete(postId);
         
         if (!deletedPost) {
@@ -191,7 +188,8 @@ exports.deletePost = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Server error during post deletion.', error: error.message });
     }
 };
-// 4. 🔥 NEW FUNCTION: SEND OTP FOR PASSWORD RESET
+
+// 5. SEND OTP FOR PASSWORD RESET
 exports.sendOTPReset = async (req, res) => {
     try {
         const { email } = req.body;
@@ -235,7 +233,7 @@ exports.sendOTPReset = async (req, res) => {
     }
 };
 
-// 5. 🔥 NEW FUNCTION: RESET PASSWORD ACCORDING TO OTP MATCH
+// 6. RESET PASSWORD ACCORDING TO OTP MATCH
 exports.resetPasswordOTP = async (req, res) => {
     try {
         const { email, otp, newPassword } = req.body;
@@ -269,37 +267,33 @@ exports.resetPasswordOTP = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Server reset execution breakdown.', error: error.message });
     }
 };
+
+// 7. UPDATE PASSWORD DIRECTLY
 exports.updatePassword = async (req, res) => {
     try {
         const { email, oldPassword, newPassword } = req.body;
 
-        // 1. Validation Check
         if (!email || !oldPassword || !newPassword) {
             return res.status(400).json({ success: false, message: "Missing required parameters." });
         }
 
-        // 2. Safely Require Mongoose locally inside block to avoid 'undefined' crash
         const mongoose = require('mongoose');
         const UserModel = mongoose.models.User || mongoose.models.user || mongoose.model('User') || mongoose.model('user');
 
-        // Step 1: Find user using the safe compiled model
         const targetUser = await UserModel.findOne({ email: email.trim() });
 
         if (!targetUser) {
             return res.status(404).json({ success: false, message: "User context not found inside database index." });
         }
 
-        // Step 2: Password comparison using top-level bcrypt
         const isMatch = await bcrypt.compare(oldPassword, targetUser.password);
 
         if (!isMatch) {
             return res.status(400).json({ success: false, message: "Security Warning: Current credential password mismatch." });
         }
 
-        // Step 3: Hash new credentials safely
         const finalPasswordToSave = await bcrypt.hash(newPassword, 10);
 
-        // Step 4: Atomic database update query
         await UserModel.updateOne(
             { email: email.trim() },
             { $set: { password: finalPasswordToSave } }

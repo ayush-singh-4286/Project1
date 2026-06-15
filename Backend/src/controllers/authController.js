@@ -1,122 +1,28 @@
 const User = require('../models/User'); 
-const OTP = require('../models/OTP'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-const otpGenerator = require('otp-generator');
 
-// ==================== NODEMAILER CONFIGURATION WITH IPV4 FORCE FIXED ====================
-const transporter = nodemailer.createTransport({
-    host: '74.125.142.108', // 🔥 FIXED: 'smtp.gmail.com' ka direct IPv4 address (Render ke IPv6 ENETUNREACH bug ko bypass karne ke liye)
-    port: 587,
-    secure: false, 
-    requireTLS: true, // 🔥 Render network bypass ke liye zaroori hai
-    auth: {
-        user: process.env.EMAIL_USER, 
-        pass: process.env.EMAIL_PASS  
-    },
-    tls: {
-        rejectUnauthorized: false,
-        servername: 'smtp.gmail.com' // 👈 Isse SSL certificate validation fail nahi hoga IP use karne par bhi
-    }
-});
-
-// Live startup logs checking (Single optimized listener)
-transporter.verify((error, success) => {
-    if (error) {
-        console.log("❌ LIVE SMTP CONFIGURATION ERROR:", error);
-    } else {
-        console.log("✅ LIVE SMTP SERVER READY TO SEND MAILS");
-    }
-});
-// =================================================================================
-
-// 1. SEND OTP (FOR SIGNUP)
-exports.sendOTP = async (req, res) => {
-    try {
-        console.log("1. Controller Hit");
-
-        const { email } = req.body;
-        console.log("2. Email:", email);
-
-        if (!email) {
-            return res.status(400).json({ success: false, message: 'Please provide an email address.' });
-        }
-
-        const existingUser = await User.findOne({ email });
-        console.log("3. User Check Done");
-
-        if (existingUser) {
-            return res.status(400).json({ success: false, message: 'User already exists with this email.' });
-        }
-
-        const generatedOtp = otpGenerator.generate(6, {
-            upperCaseAlphabets: false,
-            lowerCaseAlphabets: false,
-            specialChars: false
-        });
-        console.log("4. OTP Generated");
-
-        const otpRecord = new OTP({ email, otp: generatedOtp });
-        await otpRecord.save();
-        console.log("5. OTP Saved");
-
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Mail is from Traveller_LOG',
-            html: `<h2>Your OTP is ${generatedOtp}</h2>`
-        };
-
-        console.log("Generated OTP:", generatedOtp);
-        console.log("Sending to:", email);
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log("MAIL INFO:", info);
-        console.log("6. Mail Sent");
-
-        return res.status(200).json({
-            success: true,
-            message: 'OTP sent successfully!'
-        });
-
-    } catch (error) {
-        console.log("❌ ERROR IN SENDING OTP:", error);
-
-        return res.status(500).json({
-            success: false,
-            message: 'Failed to send OTP.',
-            error: error.message
-        });
-    }
-};
-
-// 2. FINAL SIGNUP
+// 1. SIGNUP / REGISTER (🔥 FIXED: Clean direct database registration without OTP)
 exports.signup = async (req, res) => {
     try {
-        const { email, password, otp, username, dob, gender } = req.body;
+        const { email, password, username, dob, gender } = req.body;
 
-        if (!email || !password || !otp || !username || !dob || !gender) {
+        // Validation checking
+        if (!email || !password || !username || !dob || !gender) {
             return res.status(400).json({ success: false, message: 'All fields are required.' });
         }
 
-        const latestOtpRecord = await OTP.findOne({ email }).sort({ _id: -1 });
-        if (!latestOtpRecord) {
-            return res.status(400).json({ success: false, message: 'OTP expired or never generated.' });
-        }
-
-        if (String(latestOtpRecord.otp).trim() !== String(otp).trim()) {
-            return res.status(400).json({ success: false, message: 'Invalid OTP.' });
-        }
-
+        // Check if user or username context already occupied
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
         if (existingUser) {
             return res.status(400).json({ success: false, message: 'Email or Username already taken.' });
         }
 
+        // Encrypt credentials safety string
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Save raw profile document into database cluster index
         const newUser = new User({
             email,
             password: hashedPassword,
@@ -124,16 +30,24 @@ exports.signup = async (req, res) => {
             dob,
             gender
         });
+        
         await newUser.save();
-        await OTP.deleteMany({ email });
 
-        return res.status(201).json({ success: true, message: 'Account created successfully!' });
+        return res.status(201).json({ 
+            success: true, 
+            message: 'Account created successfully! Welcome to Traveller_LOG.' 
+        });
+        
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Server error during registration.', error: error.message });
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Server error during direct registration.', 
+            error: error.message 
+        });
     }
 };
 
-// 3. LOGIN
+// 2. LOGIN AREA
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -172,13 +86,12 @@ exports.login = async (req, res) => {
     }
 };
 
-// 4. DELETE AN EXISTING POST BY ID (Fixed to dynamic check without top import crash)
+// 3. PURGE POST RECORD (Dynamic dynamic safety handler)
 exports.deletePost = async (req, res) => {
     try {
         const { postId } = req.params;
         
         const mongoose = require('mongoose');
-        // 'post' small naming standard safety handler
         const PostModel = mongoose.models.post || mongoose.models.Post || mongoose.model('post');
         const deletedPost = await PostModel.findByIdAndDelete(postId);
         
@@ -192,86 +105,7 @@ exports.deletePost = async (req, res) => {
     }
 };
 
-// 5. SEND OTP FOR PASSWORD RESET
-exports.sendOTPReset = async (req, res) => {
-    try {
-        const { email } = req.body;
-        if (!email) {
-            return res.status(400).json({ success: false, message: 'Please provide an email address.' });
-        }
-
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'No account discovered with this email address.' });
-        }
-
-        const generatedOtp = otpGenerator.generate(6, { 
-            upperCaseAlphabets: false, 
-            lowerCaseAlphabets: false, 
-            specialChars: false 
-        });
-
-        const otpRecord = new OTP({ email, otp: generatedOtp });
-        await otpRecord.save();
-
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Traveller_LOG Account Security Reset Token',
-            html: `
-                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px; max-width: 500px;">
-                    <h2>Traveller_LOG Password Reset</h2>
-                    <p>Use this security token to complete your account access override:</p>
-                    <div style="background: #fff0f2; padding: 15px; font-size: 24px; font-weight: bold; letter-spacing: 4px; text-align: center; color: #dc2626; border-radius: 6px; margin: 20px 0; border: 1px solid #fecaca;">
-                        ${generatedOtp}
-                    </div>
-                </div>
-            `
-        };
-
-        await transporter.sendMail(mailOptions);
-        return res.status(200).json({ success: true, message: 'Recovery OTP dispatched successfully!' });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: 'Failed to send recovery token.', error: error.message });
-    }
-};
-
-// 6. RESET PASSWORD ACCORDING TO OTP MATCH
-exports.resetPasswordOTP = async (req, res) => {
-    try {
-        const { email, otp, newPassword } = req.body;
-
-        if (!email || !otp || !newPassword) {
-            return res.status(400).json({ success: false, message: 'All parameters are required.' });
-        }
-
-        const latestOtpRecord = await OTP.findOne({ email }).sort({ _id: -1 });
-        if (!latestOtpRecord) {
-            return res.status(400).json({ success: false, message: 'OTP token context expired.' });
-        }
-
-        if (String(latestOtpRecord.otp).trim() !== String(otp).trim()) {
-            return res.status(400).json({ success: false, message: 'Invalid verification token.' });
-        }
-
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User context not found.' });
-        }
-
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(newPassword, salt);
-        await user.save();
-
-        await OTP.deleteMany({ email });
-
-        return res.status(200).json({ success: true, message: 'Cryptographic security string overridden successfully!' });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: 'Server reset execution breakdown.', error: error.message });
-    }
-};
-
-// 7. UPDATE PASSWORD DIRECTLY
+// 4. DIRECT PASSWORD UPDATE STRATEGY
 exports.updatePassword = async (req, res) => {
     try {
         const { email, oldPassword, newPassword } = req.body;
@@ -315,4 +149,15 @@ exports.updatePassword = async (req, res) => {
             error: error.message 
         });
     }
+};
+
+// Dummy placeholders placeholders keeping router maps safely compiled
+exports.sendOTP = async (req, res) => {
+    return res.status(410).json({ success: false, message: "OTP verification service deprecated on this server node." });
+};
+exports.sendOTPReset = async (req, res) => {
+    return res.status(410).json({ success: false, message: "OTP verification service deprecated on this server node." });
+};
+exports.resetPasswordOTP = async (req, res) => {
+    return res.status(410).json({ success: false, message: "OTP verification service deprecated on this server node." });
 };

@@ -15,65 +15,13 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [dob, setDob] = useState('');
     const [gender, setGender] = useState('Male');
-    const [otp, setOtp] = useState('');
     
     const [loading, setLoading] = useState(false);
-    const [otpSent, setOtpSent] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
     // TOGGLE ACCESS FOR LOGIN PASSWORD EYE
     const [showLoginPassword, setShowLoginPassword] = useState(false);
 
-   
-    // TRIGGER 1: SEND OTP LOGIC FOR SIGNUP WITH SPAM FILTER WARNING ALERT
-const handleSendOTP = async () => {
-    console.log("Get OTP Button Clicked");
-
-    if (!email) {
-        setErrorMsg('Please enter an email address first.');
-        return;
-    }
-
-    setLoading(true);
-    setErrorMsg('');
-
-    try {
-        console.log("Before Fetch");
-
-        const res = await fetch(
-            'https://project1-backend-c6re.onrender.com/api/auth/send-otp',
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email.trim()
-                })
-            }
-        );
-
-        console.log("After Fetch");
-        console.log("Status:", res.status);
-
-        const data = await res.json();
-        console.log("Response Data:", data);
-
-        if (res.ok && data.success) {
-            setOtpSent(true);
-            alert("📩 OTP Sent successfully!");
-        } else {
-            setErrorMsg(data.message || 'Failed to send OTP');
-        }
-
-    } catch (err) {
-        console.log("FETCH ERROR:", err);
-        setErrorMsg('Handshake failed. Backend server engine unresponsive.');
-    } finally {
-        setLoading(false);
-    }
-};
     // SUBMIT ACTIONS SELECTOR
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -82,16 +30,16 @@ const handleSendOTP = async () => {
 
         if (isSignUp) {
             try {
+                // 🔥 FIXED: Yahan se OTP hatakar direct baseline parameters bhej rahe hain
                 const response = await fetch('https://project1-backend-c6re.onrender.com/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, otp, username, dob, gender })
+                    body: JSON.stringify({ email, password, username, dob, gender })
                 });
                 const data = await response.json();
                 if (response.ok && data.success) {
                     alert('✓ Account deployed successfully! Please login with your credentials.');
                     setIsSignUp(false); 
-                    setOtpSent(false);
                 } else {
                     setErrorMsg(data.message || 'Registration pipeline configuration rejected.');
                 }
@@ -120,7 +68,6 @@ const handleSendOTP = async () => {
                     localStorage.setItem('userId', actualId);
                     localStorage.setItem('userDob', actualDob);       
                     localStorage.setItem('userGender', actualGender); 
-                    // LocalStorage mapping section ke andar bas ye line add kar do:
                     localStorage.setItem('userEmail', email); 
                     setTimeout(() => navigate('/landing'), 400);
                 } else {
@@ -169,8 +116,8 @@ const handleSendOTP = async () => {
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     
-                    {/* EMAIL INPUT FIELD */}
-                    <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                    {/* EMAIL INPUT FIELD (🔥 FIXED: Get OTP button completely removed) */}
+                    <div style={{ width: '100%' }}>
                         <input 
                             type="email" 
                             placeholder="Email Address" 
@@ -179,24 +126,11 @@ const handleSendOTP = async () => {
                             required
                             style={inputStyle}
                         />
-                        {isSignUp && (
-                            <button type="button" onClick={handleSendOTP} disabled={loading || otpSent} style={{ padding: '0 12px', border: 'none', borderRadius: '10px', backgroundColor: otpSent ? 'rgba(34, 197, 94, 0.2)' : theme.accent, color: '#fff', fontSize: '12px', fontWeight: '700', cursor: 'pointer', minWidth: '90px' }}>
-                                {otpSent ? 'Sent ✓' : 'Get OTP'}
-                            </button>
-                        )}
                     </div>
 
-                    {/* SIGNUP ADDITIONAL INPUT LAYER */}
+                    {/* SIGNUP ADDITIONAL INPUT LAYER (🔥 FIXED: OTP Input Box Completely Removed) */}
                     {isSignUp && (
                         <>
-                            <input 
-                                type="text" 
-                                placeholder="Verification OTP Code" 
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
-                                required
-                                style={inputStyle}
-                            />
                             <input 
                                 type="text" 
                                 placeholder="Unique Username Tag" 
@@ -252,7 +186,7 @@ const handleSendOTP = async () => {
 
                 <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '14px', color: theme.textMuted }}>
                     {isSignUp ? 'Already mapped into index?' : 'New explorer track?'} {' '}
-                    <span onClick={() => { setIsSignUp(!isSignUp); setErrorMsg(''); setOtpSent(false); }} style={{ color: theme.accent, fontWeight: '700', cursor: 'pointer' }}>
+                    <span onClick={() => { setIsSignUp(!isSignUp); setErrorMsg(''); }} style={{ color: theme.accent, fontWeight: '700', cursor: 'pointer' }}>
                         {isSignUp ? 'Authorize Login' : 'Initialize Account'}
                     </span>
                 </div>

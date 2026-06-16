@@ -189,7 +189,7 @@ const Login = () => {
                     <div style={{ position: 'relative', width: '100%' }}>
                         <input 
                             type={showLoginPassword ? "text" : "password"} 
-                            placeholder={isSignUp ? "Enter Password" : "Place Enter password"} 
+                            placeholder={isSignUp ? "Enter Password" : "Enter password"} 
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required

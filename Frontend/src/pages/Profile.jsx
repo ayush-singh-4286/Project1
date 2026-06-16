@@ -58,7 +58,7 @@ const Profile = () => {
             setDob('Not Specified');
         }
 
-        // 🔥 REAL-TIME STORAGE EVENT LISTENER FOR INSTANT LIGHT/DARK TOGGLE
+        // REAL-TIME STORAGE EVENT LISTENER FOR INSTANT LIGHT/DARK TOGGLE
         const handleStorageChange = () => {
             const savedTheme = localStorage.getItem('themePreference');
             setIsDarkMode(savedTheme ? savedTheme === 'dark' : true);
@@ -120,14 +120,15 @@ const Profile = () => {
     };
 
     const theme = {
-        bg: isDarkMode ? '#090d16' : '#f8fafc',
+        bg: isDarkMode ? '#090d16' : '#ffb703',
         cardBg: isDarkMode ? 'rgba(51, 52, 53, 0.4)' : '#ffffff',
-        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
+        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.12)',
         inputBg: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : '#f1f5f9',
         textMain: isDarkMode ? '#f8fafc' : '#0f172a',
         textMuted: isDarkMode ? '#64748b' : '#475569',
         accent: '#38bdf8',
-        glassBtn: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)'
+        glassBtn: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)',
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)'
     };
 
     const inputContainerStyle = {
@@ -142,7 +143,7 @@ const Profile = () => {
         backgroundColor: theme.inputBg,
         border: `1px solid ${theme.border}`,
         borderRadius: '8px',
-        color: theme.textMain, // Dynamic input text color mapping
+        color: theme.textMain,
         fontSize: '14px',
         outline: 'none',
         boxSizing: 'border-box'
@@ -164,7 +165,17 @@ const Profile = () => {
     };
 
     return (
-        <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: theme.textMain, fontFamily: "'Urbanist', sans-serif", padding: '40px 20px', boxSizing: 'border-box', transition: 'background-color 0.3s ease, color 0.3s ease' }}>
+        <div style={{ 
+            backgroundColor: theme.bg, 
+            minHeight: '100vh', 
+            color: theme.textMain, 
+            fontFamily: "'Urbanist', sans-serif", 
+            padding: '40px 20px', 
+            boxSizing: 'border-box', 
+            transition: 'background-color 0.3s ease, color 0.3s ease',
+            backgroundImage: `linear-gradient(${theme.gridColor} 1px, transparent 1px), linear-gradient(90deg, ${theme.gridColor} 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
+        }}>
             
             <div style={{ maxWidth: '800px', margin: '0 auto 30px auto' }}>
                 <button 

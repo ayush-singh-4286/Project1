@@ -23,6 +23,14 @@ const TravelDashboard = () => {
         }
         setUsername(storedUsername || 'User');
         fetchMemories(token);
+
+        // REAL-TIME STORAGE EVENT LISTENER FOR INSTANT LIGHT/DARK TOGGLE
+        const handleStorageChange = () => {
+            const savedTheme = localStorage.getItem('themePreference');
+            setIsDarkMode(savedTheme ? savedTheme === 'dark' : true);
+        };
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
     const fetchMemories = async (token) => {
@@ -59,13 +67,14 @@ const TravelDashboard = () => {
     };
 
     const theme = {
-        bg: isDarkMode ? '#090d16' : '#f8fafc',
+        bg: isDarkMode ? '#090d16' : '#ffb703',
         cardBg: isDarkMode ? 'rgba(15, 23, 42, 0.4)' : '#ffffff',
-        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
+        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.12)',
         textMain: isDarkMode ? '#f8fafc' : '#0f172a',
         textMuted: isDarkMode ? '#64748b' : '#475569',
         accent: '#6366f1',
-        glassBtn: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)'
+        glassBtn: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)',
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)'
     };
 
     const navBtnStyle = {
@@ -83,7 +92,17 @@ const TravelDashboard = () => {
     if (loading) return <div style={{ color: theme.textMain, textAlign: 'center', padding: '100px', backgroundColor: theme.bg }}>Wait for a while...</div>;
 
     return (
-        <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: theme.textMain, fontFamily: "'Urbanist', sans-serif", padding: '0 0 40px 0', boxSizing: 'border-box', transition: 'background-color 0.3s ease, color 0.3s ease' }}>
+        <div style={{ 
+            backgroundColor: theme.bg, 
+            minHeight: '100vh', 
+            color: theme.textMain, 
+            fontFamily: "'Urbanist', sans-serif", 
+            padding: '0 0 40px 0', 
+            boxSizing: 'border-box', 
+            transition: 'background-color 0.3s ease, color 0.3s ease',
+            backgroundImage: `linear-gradient(${theme.gridColor} 1px, transparent 1px), linear-gradient(90deg, ${theme.gridColor} 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
+        }}>
             
             {/* UNIVERSAL HEADER */}
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px', borderBottom: `1px solid ${theme.border}`, backdropFilter: 'blur(10px)', marginBottom: '40px' }}>
@@ -112,7 +131,6 @@ const TravelDashboard = () => {
                 {/* STRICT SIDE-BY-SIDE GRID */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '30px' }}>
                     {memories.map((item) => {
-                        
                         const hasPipe = item.caption && item.caption.includes(' | ');
                         const parts = hasPipe ? item.caption.split(' | ') : [];
                         
@@ -123,12 +141,10 @@ const TravelDashboard = () => {
                         return (
                             <div key={item._id} style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: isDarkMode ? '0 10px 30px rgba(0,0,0,0.25)' : '0 10px 30px rgba(15,23,42,0.04)', backdropFilter: 'blur(12px)' }}>
                                 
-                                {/* Photo Container Box */}
                                 <div style={{ width: '100%', height: '280px', backgroundColor: isDarkMode ? '#05070c' : '#f1f5f9', display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottom: `1px solid ${theme.border}` }}>
                                     <img src={item.image} alt={finalTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 </div>
                                 
-                                {/* Photo Details Meta Content Area */}
                                 <div style={{ padding: '24px', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '16px' }}>
                                     <div>
                                         <h4 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 8px 0', color: theme.textMain, letterSpacing: '-0.3px' }}>

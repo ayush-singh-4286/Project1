@@ -32,6 +32,14 @@ const CreatePost = () => {
             return;
         }
         fetchUserFolders(token);
+
+        // REAL-TIME STORAGE EVENT LISTENER FOR INSTANT LIGHT/DARK TOGGLE
+        const handleStorageChange = () => {
+            const savedTheme = localStorage.getItem('themePreference');
+            setIsDarkMode(savedTheme ? savedTheme === 'dark' : true);
+        };
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
     const fetchUserFolders = async (token) => {
@@ -97,14 +105,15 @@ const CreatePost = () => {
     };
 
     const theme = {
-        bg: isDarkMode ? '#090d16' : '#f8fafc',
+        bg: isDarkMode ? '#090d16' : '#ffb703',
         cardBg: isDarkMode ? 'rgba(15, 23, 42, 0.4)' : '#ffffff',
-        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
+        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.12)',
         inputBg: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : '#f1f5f9',
         textMain: isDarkMode ? '#f8fafc' : '#0f172a',
         textMuted: isDarkMode ? '#64748b' : '#475569',
         accent: '#6366f1',
-        glassBtn: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)'
+        glassBtn: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)',
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)'
     };
 
     const navBtnStyle = {
@@ -120,7 +129,15 @@ const CreatePost = () => {
     };
 
     return (
-        <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: theme.textMain, fontFamily: "'Urbanist', sans-serif", transition: 'background-color 0.3s ease, color 0.3s ease' }}>
+        <div style={{ 
+            backgroundColor: theme.bg, 
+            minHeight: '100vh', 
+            color: theme.textMain, 
+            fontFamily: "'Urbanist', sans-serif", 
+            transition: 'background-color 0.3s ease, color 0.3s ease',
+            backgroundImage: `linear-gradient(${theme.gridColor} 1px, transparent 1px), linear-gradient(90deg, ${theme.gridColor} 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
+        }}>
             
             {/* UNIVERSAL NAVIGATION HEADER BAR */}
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px', borderBottom: `1px solid ${theme.border}`, backdropFilter: 'blur(10px)' }}>

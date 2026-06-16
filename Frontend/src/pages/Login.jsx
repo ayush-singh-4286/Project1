@@ -3,26 +3,16 @@ import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const navigate = useNavigate();
-    
-    // DUAL LAYER TOGGLE MECHANISM (Login vs Signup)
     const [isSignUp, setIsSignUp] = useState(false);
-    
-    // Shared Operational Fields
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    
-    // Signup Special Parameter Fields
     const [username, setUsername] = useState('');
     const [dob, setDob] = useState('');
     const [gender, setGender] = useState('Male');
-    
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
-
-    // TOGGLE ACCESS FOR LOGIN PASSWORD EYE
     const [showLoginPassword, setShowLoginPassword] = useState(false);
 
-    // THEME STATE SYNCED WITH LOCALSTORAGE
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const savedTheme = localStorage.getItem('themePreference');
         return savedTheme ? savedTheme === 'dark' : true;
@@ -36,7 +26,6 @@ const Login = () => {
         });
     };
 
-    // SUBMIT ACTIONS SELECTOR
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -95,13 +84,14 @@ const Login = () => {
     };
 
     const theme = {
-        bg: isDarkMode ? '#090d16' : '#f8fafc',
+        bg: isDarkMode ? '#090d16' : '#ffb703', // Orange backdrop in light mode
         cardBg: isDarkMode ? 'rgba(15, 23, 42, 0.4)' : '#ffffff',
-        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
+        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.12)',
         inputBg: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : '#f1f5f9',
         textMain: isDarkMode ? '#f8fafc' : '#0f172a',
         textMuted: isDarkMode ? '#64748b' : '#475569',
-        accent: '#6366f1'
+        accent: '#6366f1',
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)' // Subtle grid line colors
     };
 
     const inputStyle = {
@@ -117,18 +107,40 @@ const Login = () => {
     };
 
     return (
-        <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: theme.textMain, fontFamily: "'Urbanist', sans-serif", display: 'grid', placeItems: 'center', padding: '20px', boxSizing: 'border-box', position: 'relative', transition: 'background-color 0.3s ease, color 0.3s ease' }}>
+        <div style={{ 
+            backgroundColor: theme.bg, 
+            minHeight: '100vh', 
+            color: theme.textMain, 
+            fontFamily: "'Urbanist', sans-serif", 
+            display: 'grid', 
+            placeItems: 'center', 
+            padding: '20px', 
+            boxSizing: 'border-box', 
+            position: 'relative', 
+            transition: 'background-color 0.3s ease, color 0.3s ease',
+            // DYNAMIC CSS GRID PATTERN INJECTED HERE
+            backgroundImage: `linear-gradient(${theme.gridColor} 1px, transparent 1px), linear-gradient(90deg, ${theme.gridColor} 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
+        }}>
             
-            {/* FLOATING CORNER THEME TOGGLE BUTTON */}
             <button 
                 onClick={toggleTheme}
-                style={{ position: 'absolute', top: '20px', right: '20px', background: theme.cardBg, border: `1px solid ${theme.border}`, padding: '10px 16px', borderRadius: '20px', cursor: 'pointer', color: theme.textMain, fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                style={{ position: 'absolute', top: '20px', right: '20px', background: theme.cardBg, border: `1px solid ${theme.border}`, padding: '10px 16px', borderRadius: '20px', cursor: 'pointer', color: theme.textMain, fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', zIndex: 10 }}
             >
                 {isDarkMode ? '☀️ Light' : '🌙 Dark'}
             </button>
 
-            <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: '40px 30px', borderRadius: '24px', width: '100%', maxWidth: '440px', boxSizing: 'border-box', backdropFilter: 'blur(16px)', boxShadow: isDarkMode ? '0 20px 50px rgba(0,0,0,0.4)' : '0 20px 50px rgba(15,23,42,0.05)' }}>
+            <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: '40px 30px', borderRadius: '24px', width: '100%', maxWidth: '440px', boxSizing: 'border-box', backdropFilter: 'blur(16px)', boxShadow: isDarkMode ? '0 20px 50px rgba(0,0,0,0.4)' : '0 20px 50px rgba(15,23,42,0.1)' }}>
                 
+                {/* BRAND LOGO DISPLAY EMBEDDED */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                    <img 
+                        src="/logo.png" 
+                        alt="Traveller_LOG" 
+                        style={{ width: '90px', height: '90px', objectFit: 'contain', borderRadius: '50%', border: `2px solid ${theme.border}` }} 
+                    />
+                </div>
+
                 <h3 style={{ fontSize: '26px', fontWeight: '900', textAlign: 'center', margin: '0 0 6px 0', letterSpacing: '-0.5px', color: theme.textMain }}>Traveller_LOG</h3>
                 
                 <p style={{ color: theme.textMuted, fontSize: '13px', textAlign: 'center', margin: '0 0 24px 0' }}>
@@ -138,8 +150,6 @@ const Login = () => {
                 {errorMsg && <div style={{ fontSize: '13px', color: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.05)', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', fontWeight: '600', border: '1px solid rgba(244, 63, 94, 0.1)' }}>{errorMsg}</div>}
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    
-                    {/* EMAIL INPUT FIELD */}
                     <div style={{ width: '100%' }}>
                         <input 
                             type="email" 
@@ -151,7 +161,6 @@ const Login = () => {
                         />
                     </div>
 
-                    {/* SIGNUP ADDITIONAL INPUT LAYER */}
                     {isSignUp && (
                         <>
                             <input 
@@ -170,14 +179,13 @@ const Login = () => {
                                 style={{ ...inputStyle, colorScheme: isDarkMode ? 'dark' : 'light' }}
                             />
                             <select value={gender} onChange={(e) => setGender(e.target.value)} style={inputStyle}>
-                                <option value="Male" style={{ background: theme.bg, color: theme.textMain }}>Male</option>
-                                <option value="Female" style={{ background: theme.bg, color: theme.textMain }}>Female</option>
-                                <option value="Other" style={{ background: theme.bg, color: theme.textMain }}>Other</option>
+                                <option value="Male" style={{ background: theme.cardBg, color: theme.textMain }}>Male</option>
+                                <option value="Female" style={{ background: theme.cardBg, color: theme.textMain }}>Female</option>
+                                <option value="Other" style={{ background: theme.cardBg, color: theme.textMain }}>Other</option>
                             </select>
                         </>
                     )}
 
-                    {/* PASSWORD CONTAINER WITH SHOW/HIDE ACTION */}
                     <div style={{ position: 'relative', width: '100%' }}>
                         <input 
                             type={showLoginPassword ? "text" : "password"} 

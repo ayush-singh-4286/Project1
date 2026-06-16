@@ -9,16 +9,13 @@ const LandingPage = () => {
     const [loading, setLoading] = useState(true);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
     
-    // THEME STATE SYNCED WITH LOCALSTORAGE
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const savedTheme = localStorage.getItem('themePreference');
         return savedTheme ? savedTheme === 'dark' : true;
     });
 
-    // FULL SCREEN METADATA MEDIA LIGHTBOX OVERLAY IMAGES
     const [fullscreenImage, setFullscreenImage] = useState(null);
 
-    // MAIN HOMEPAGE PLUS INJECTION PIPELINE FORM CONTROLLERS
     const [showMainUploadModal, setShowMainUploadModal] = useState(false);
     const [mainTitle, setMainTitle] = useState('');
     const [mainFolder, setMainFolder] = useState('');
@@ -27,7 +24,6 @@ const LandingPage = () => {
     const [mainImageFile, setMainImageFile] = useState(null);
     const [mainUploading, setMainUploading] = useState(false);
 
-    // IN-FOLDER MODAL SYSTEM STATES
     const [showModal, setShowModal] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalDescription, setModalDescription] = useState('');
@@ -207,15 +203,16 @@ const LandingPage = () => {
     };
 
     const theme = {
-        bg: isDarkMode ? '#090d16' : '#f8fafc',
+        bg: isDarkMode ? '#090d16' : '#ffb703', // Matching layout theme
         cardBg: isDarkMode ? 'rgba(15, 23, 42, 0.4)' : '#ffffff',
-        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
+        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.12)',
         inputBg: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : '#f1f5f9',
         textMain: isDarkMode ? '#f8fafc' : '#0f172a',
         textMuted: isDarkMode ? '#64748b' : '#475569',
         accent: '#6366f1',
         glassBtn: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)',
-        modalBg: isDarkMode ? '#0f172a' : '#ffffff'
+        modalBg: isDarkMode ? '#0f172a' : '#ffffff',
+        gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)'
     };
 
     const navBtnStyle = {
@@ -261,17 +258,32 @@ const LandingPage = () => {
     const totalFoldersExist = Object.keys(trips).length;
 
     return (
-        <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: theme.textMain, fontFamily: "'Urbanist', sans-serif", display: 'flex', flexDirection: 'column', transition: 'background-color 0.3s ease, color 0.3s ease' }}>
+        <div style={{ 
+            backgroundColor: theme.bg, 
+            minHeight: '100vh', 
+            color: theme.textMain, 
+            fontFamily: "'Urbanist', sans-serif", 
+            display: 'flex', 
+            flexDirection: 'column', 
+            transition: 'background-color 0.3s ease, color 0.3s ease',
+            // DYNAMIC GRID INJECTED TO LANDING
+            backgroundImage: `linear-gradient(${theme.gridColor} 1px, transparent 1px), linear-gradient(90deg, ${theme.gridColor} 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
+        }}>
             
             {/* TOP HEADER */}
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px', borderBottom: `1px solid ${theme.border}`, backdropFilter: 'blur(10px)', position: 'relative', zIndex: 100 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                    <div onClick={() => { setSelectedFolder(null); setMobileMenuOpen(false); }} style={{ padding: '8px 20px', border: `1px solid ${theme.border}`, borderRadius: '30px', fontWeight: '900', fontSize: '14px', letterSpacing: '1px', background: isDarkMode ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', color: theme.textMain, cursor: 'pointer' }}>
-                        Traveller_LOG
+                <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                    {/* MINI ROUND BRAND ICON */}
+                    <img src="/logo.png" alt="logo" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <div onClick={() => { setSelectedFolder(null); setMobileMenuOpen(false); }} style={{ padding: '4px 14px', border: `1px solid ${theme.border}`, borderRadius: '30px', fontWeight: '900', fontSize: '13px', letterSpacing: '0.5px', background: isDarkMode ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', color: theme.textMain, cursor: 'pointer' }}>
+                            Traveller_LOG
+                        </div>
+                        <span style={{ fontSize: '10px', color: theme.textMuted, fontWeight: '700', letterSpacing: '0.5px', marginTop: '3px', marginLeft: '6px' }}>
+                            Made by Ayush
+                        </span>
                     </div>
-                    <span style={{ fontSize: '10px', color: theme.textMuted, fontWeight: '700', letterSpacing: '0.5px', marginTop: '5px', marginLeft: '8px' }}>
-                        Made by Ayush
-                    </span>
                 </div>
                 
                 <div style={{ fontSize: '16px', fontWeight: '700', color: theme.textMain }} className="desktop-only">
@@ -346,11 +358,10 @@ const LandingPage = () => {
                                     {Object.keys(trips).map((locationName) => {
                                         const currentFolderSummary = extractFolderSummary(trips[locationName]);
                                         return (
-                                            <div key={locationName} onClick={() => setSelectedFolder(locationName)} style={{ width: '100%', height: '380px', backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '24px', overflow: 'hidden', cursor: 'pointer', position: 'relative', boxShadow: isDarkMode ? 'none' : '0 10px 30px rgba(0,0,0,0.04)' }}>
+                                            <div key={locationName} onClick={() => setSelectedFolder(locationName)} style={{ width: '100%', height: '380px', backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '24px', overflow: 'hidden', cursor: 'pointer', position: 'relative', boxShadow: isDarkMode ? 'none' : '0 10px 30px rgba(0,0,0,0.06)' }}>
                                                 <div style={{ width: '100%', height: '100%', backgroundColor: isDarkMode ? '#05070c' : '#f1f5f9', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                                     <img src={trips[locationName][0]?.image} alt={locationName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                                 </div>
-                                                {/* 🔥 GRADIENT ADJUSTED DYNAMICALLY FOR LIGHT/DARK VISUAL ACCURACY */}
                                                 <div style={{ 
                                                     position: 'absolute', 
                                                     bottom: 0, 
@@ -440,35 +451,9 @@ const LandingPage = () => {
                     </h3>
 
                     <div className="footer-btns" style={{ display: 'flex', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
-                        <a 
-                            href="https://github.com/ayush-singh-4286" 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="social-link-btn"
-                            style={socialBtnStyle('#24292e')}
-                        >
-                            GitHub
-                        </a>
-
-                        <a 
-                            href="https://leetcode.com/u/Ayush4286/" 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="social-link-btn"
-                            style={socialBtnStyle('#ffa116')}
-                        >
-                            LeetCode
-                        </a>
-
-                        <a 
-                            href="https://www.linkedin.com/in/ayush-k-singh-cse/" 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="social-link-btn"
-                            style={socialBtnStyle('#0077b5')}
-                        >
-                            LinkedIn
-                        </a>
+                        <a href="https://github.com/ayush-singh-4286" target="_blank" rel="noopener noreferrer" className="social-link-btn" style={socialBtnStyle('#24292e')}>GitHub</a>
+                        <a href="https://leetcode.com/u/Ayush4286/" target="_blank" rel="noopener noreferrer" className="social-link-btn" style={socialBtnStyle('#ffa116')}>LeetCode</a>
+                        <a href="https://www.linkedin.com/in/ayush-k-singh-cse/" target="_blank" rel="noopener noreferrer" className="social-link-btn" style={socialBtnStyle('#0077b5')}>LinkedIn</a>
                     </div>
                 </div>
             </footer>

@@ -22,6 +22,20 @@ const Login = () => {
     // TOGGLE ACCESS FOR LOGIN PASSWORD EYE
     const [showLoginPassword, setShowLoginPassword] = useState(false);
 
+    // THEME STATE SYNCED WITH LOCALSTORAGE
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const savedTheme = localStorage.getItem('themePreference');
+        return savedTheme ? savedTheme === 'dark' : true;
+    });
+
+    const toggleTheme = () => {
+        setIsDarkMode(prev => {
+            const nextMode = !prev;
+            localStorage.setItem('themePreference', nextMode ? 'dark' : 'light');
+            return nextMode;
+        });
+    };
+
     // SUBMIT ACTIONS SELECTOR
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -81,12 +95,12 @@ const Login = () => {
     };
 
     const theme = {
-        bg: '#090d16',
-        cardBg: 'rgba(15, 23, 42, 0.4)',
-        border: 'rgba(255, 255, 255, 0.08)',
-        inputBg: 'rgba(30, 41, 59, 0.5)',
-        textMain: '#f8fafc',
-        textMuted: '#64748b',
+        bg: isDarkMode ? '#090d16' : '#f8fafc',
+        cardBg: isDarkMode ? 'rgba(15, 23, 42, 0.4)' : '#ffffff',
+        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
+        inputBg: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : '#f1f5f9',
+        textMain: isDarkMode ? '#f8fafc' : '#0f172a',
+        textMuted: isDarkMode ? '#64748b' : '#475569',
         accent: '#6366f1'
     };
 
@@ -96,21 +110,29 @@ const Login = () => {
         backgroundColor: theme.inputBg, 
         border: `1px solid ${theme.border}`, 
         borderRadius: '10px', 
-        color: '#fff', 
+        color: theme.textMain, 
         fontSize: '14px', 
         outline: 'none', 
         boxSizing: 'border-box'
     };
 
     return (
-        <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: theme.textMain, fontFamily: "'Urbanist', sans-serif", display: 'grid', placeItems: 'center', padding: '20px', boxSizing: 'border-box' }}>
-            <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: '40px 30px', borderRadius: '24px', width: '100%', maxWidth: '440px', boxSizing: 'border-box', backdropFilter: 'blur(16px)', boxShadow: '0 20px 50px rgba(0,0,0,0.4)' }}>
+        <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: theme.textMain, fontFamily: "'Urbanist', sans-serif", display: 'grid', placeItems: 'center', padding: '20px', boxSizing: 'border-box', position: 'relative', transition: 'background-color 0.3s ease, color 0.3s ease' }}>
+            
+            {/* FLOATING CORNER THEME TOGGLE BUTTON */}
+            <button 
+                onClick={toggleTheme}
+                style={{ position: 'absolute', top: '20px', right: '20px', background: theme.cardBg, border: `1px solid ${theme.border}`, padding: '10px 16px', borderRadius: '20px', cursor: 'pointer', color: theme.textMain, fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            >
+                {isDarkMode ? '☀️ Light' : '🌙 Dark'}
+            </button>
+
+            <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, padding: '40px 30px', borderRadius: '24px', width: '100%', maxWidth: '440px', boxSizing: 'border-box', backdropFilter: 'blur(16px)', boxShadow: isDarkMode ? '0 20px 50px rgba(0,0,0,0.4)' : '0 20px 50px rgba(15,23,42,0.05)' }}>
                 
-                <h3 style={{ fontSize: '26px', fontWeight: '900', textAlign: 'center', margin: '0 0 6px 0', letterSpacing: '-0.5px' }}>Traveller_LOG</h3>
+                <h3 style={{ fontSize: '26px', fontWeight: '900', textAlign: 'center', margin: '0 0 6px 0', letterSpacing: '-0.5px', color: theme.textMain }}>Traveller_LOG</h3>
                 
-                {/* 🔥 IMAGE FIXED: Heading texts changed to simple style */}
                 <p style={{ color: theme.textMuted, fontSize: '13px', textAlign: 'center', margin: '0 0 24px 0' }}>
-                    {isSignUp ? 'Welcome! Let\'s set up your account' : 'Welcome Back! Please login to your account'}
+                    {isSignUp ? "Welcome! Let's set up your account" : 'Welcome Back! Please login to your account'}
                 </p>
 
                 {errorMsg && <div style={{ fontSize: '13px', color: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.05)', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', fontWeight: '600', border: '1px solid rgba(244, 63, 94, 0.1)' }}>{errorMsg}</div>}
@@ -132,7 +154,6 @@ const Login = () => {
                     {/* SIGNUP ADDITIONAL INPUT LAYER */}
                     {isSignUp && (
                         <>
-                            {/* 🔥 IMAGE FIXED: "Unique username tag" changed to "Enter username" */}
                             <input 
                                 type="text" 
                                 placeholder="Enter username" 
@@ -146,19 +167,18 @@ const Login = () => {
                                 value={dob}
                                 onChange={(e) => setDob(e.target.value)}
                                 required
-                                style={{ ...inputStyle, colorScheme: 'dark' }}
+                                style={{ ...inputStyle, colorScheme: isDarkMode ? 'dark' : 'light' }}
                             />
                             <select value={gender} onChange={(e) => setGender(e.target.value)} style={inputStyle}>
-                                <option value="Male" style={{ background: theme.bg }}>Male</option>
-                                <option value="Female" style={{ background: theme.bg }}>Female</option>
-                                <option value="Other" style={{ background: theme.bg }}>Other</option>
+                                <option value="Male" style={{ background: theme.bg, color: theme.textMain }}>Male</option>
+                                <option value="Female" style={{ background: theme.bg, color: theme.textMain }}>Female</option>
+                                <option value="Other" style={{ background: theme.bg, color: theme.textMain }}>Other</option>
                             </select>
                         </>
                     )}
 
                     {/* PASSWORD CONTAINER WITH SHOW/HIDE ACTION */}
                     <div style={{ position: 'relative', width: '100%' }}>
-                        {/* 🔥 IMAGE FIXED: Passwords placeholder changes according to login/signup */}
                         <input 
                             type={showLoginPassword ? "text" : "password"} 
                             placeholder={isSignUp ? "Enter Password" : "Place Enter password"} 
@@ -176,15 +196,11 @@ const Login = () => {
                         </button>
                     </div>
                     
-                   
-
-                    {/* 🔥 IMAGE FIXED: Buttons text changed to "Create Accout" and "Login" */}
                     <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)', color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)', marginTop: '8px' }}>
                         {loading ? 'Processing...' : isSignUp ? 'Create Accout' : 'Login'}
                     </button>
                 </form>
 
-                {/* 🔥 IMAGE FIXED: Lower toggle links labels updated */}
                 <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '14px', color: theme.textMuted }}>
                     {isSignUp ? 'Already have an account?' : 'First time here?'} {' '}
                     <span onClick={() => { setIsSignUp(!isSignUp); setErrorMsg(''); }} style={{ color: theme.accent, fontWeight: '700', cursor: 'pointer' }}>

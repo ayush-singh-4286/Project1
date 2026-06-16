@@ -21,6 +21,12 @@ const Profile = () => {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // THEME STATE CONTROL SYNCED WITH LOCALSTORAGE
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const savedTheme = localStorage.getItem('themePreference');
+        return savedTheme ? savedTheme === 'dark' : true;
+    });
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         const storedUsername = localStorage.getItem('username');
@@ -51,6 +57,14 @@ const Profile = () => {
         } else {
             setDob('Not Specified');
         }
+
+        // 🔥 REAL-TIME STORAGE EVENT LISTENER FOR INSTANT LIGHT/DARK TOGGLE
+        const handleStorageChange = () => {
+            const savedTheme = localStorage.getItem('themePreference');
+            setIsDarkMode(savedTheme ? savedTheme === 'dark' : true);
+        };
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
     const handlePasswordUpdate = async (e) => {
@@ -74,7 +88,6 @@ const Profile = () => {
         }
 
         try {
-            // 🔥 FIXED: 'http://localhost:3000' ko hatakar tumhara live RENDER endpoint map kar diya hai
             const response = await fetch('https://project1-backend-c6re.onrender.com/api/auth/update-password', {
                 method: 'POST',
                 headers: {
@@ -107,13 +120,14 @@ const Profile = () => {
     };
 
     const theme = {
-        bg: '#090d16',
-        cardBg: 'rgba(51, 52, 53, 0.4)',
-        border: 'rgba(255, 255, 255, 0.08)',
-        inputBg: 'rgba(30, 41, 59, 0.5)',
-        textMain: '#f8fafc',
-        textMuted: '#64748b',
-        accent: '#38bdf8'
+        bg: isDarkMode ? '#090d16' : '#f8fafc',
+        cardBg: isDarkMode ? 'rgba(51, 52, 53, 0.4)' : '#ffffff',
+        border: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
+        inputBg: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : '#f1f5f9',
+        textMain: isDarkMode ? '#f8fafc' : '#0f172a',
+        textMuted: isDarkMode ? '#64748b' : '#475569',
+        accent: '#38bdf8',
+        glassBtn: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.04)'
     };
 
     const inputContainerStyle = {
@@ -128,7 +142,7 @@ const Profile = () => {
         backgroundColor: theme.inputBg,
         border: `1px solid ${theme.border}`,
         borderRadius: '8px',
-        color: '#fff',
+        color: theme.textMain, // Dynamic input text color mapping
         fontSize: '14px',
         outline: 'none',
         boxSizing: 'border-box'
@@ -150,12 +164,12 @@ const Profile = () => {
     };
 
     return (
-        <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: theme.textMain, fontFamily: "'Urbanist', sans-serif", padding: '40px 20px', boxSizing: 'border-box' }}>
+        <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: theme.textMain, fontFamily: "'Urbanist', sans-serif", padding: '40px 20px', boxSizing: 'border-box', transition: 'background-color 0.3s ease, color 0.3s ease' }}>
             
             <div style={{ maxWidth: '800px', margin: '0 auto 30px auto' }}>
                 <button 
                     onClick={() => navigate('/landing')}
-                    style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${theme.border}`, color: '#fff', padding: '10px 20px', borderRadius: '12px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
+                    style={{ background: theme.glassBtn, border: `1px solid ${theme.border}`, color: theme.textMain, padding: '10px 20px', borderRadius: '12px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
                 >
                     ← Return to Dashboard
                 </button>
@@ -163,13 +177,14 @@ const Profile = () => {
 
             <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' }}>
                 
-                <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '24px', padding: '36px', backdropFilter: 'blur(16px)', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
+                {/* ACCOUNT PROFILE INFO CARD */}
+                <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '24px', padding: '36px', backdropFilter: 'blur(16px)', boxShadow: isDarkMode ? '0 20px 40px rgba(0,0,0,0.3)' : '0 20px 40px rgba(15,23,42,0.04)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '28px', borderBottom: `1px solid ${theme.border}`, paddingBottom: '20px' }}>
                         <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(56, 189, 248, 0.1)', border: `1px solid ${theme.accent}`, display: 'grid', placeItems: 'center', fontSize: '28px' }}>
                             👤
                         </div>
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px' }}>My Account</h2>
+                            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px', color: theme.textMain }}>My Account</h2>
                             <p style={{ margin: '4px 0 0 0', color: theme.textMuted, fontSize: '13px' }}>User registered</p>
                         </div>
                     </div>
@@ -177,7 +192,7 @@ const Profile = () => {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
                         <div>
                             <span style={{ fontSize: '12px', color: theme.textMuted, fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Username Tag</span>
-                            <div style={{ fontSize: '16px', fontWeight: '700', marginTop: '4px', color: '#fff' }}>{username}</div>
+                            <div style={{ fontSize: '16px', fontWeight: '700', marginTop: '4px', color: theme.textMain }}>{username}</div>
                         </div>
                         <div>
                             <span style={{ fontSize: '12px', color: theme.textMuted, fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Email Allocation</span>
@@ -185,24 +200,25 @@ const Profile = () => {
                         </div>
                         <div>
                             <span style={{ fontSize: '12px', color: theme.textMuted, fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Date of Birth</span>
-                            <div style={{ fontSize: '16px', fontWeight: '700', marginTop: '4px', color: '#fff' }}>{dob}</div>
+                            <div style={{ fontSize: '16px', fontWeight: '700', marginTop: '4px', color: theme.textMain }}>{dob}</div>
                         </div>
                         <div>
                             <span style={{ fontSize: '12px', color: theme.textMuted, fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Gender Mapping</span>
-                            <div style={{ fontSize: '16px', fontWeight: '700', marginTop: '4px', color: '#fff' }}>{gender}</div>
+                            <div style={{ fontSize: '16px', fontWeight: '700', marginTop: '4px', color: theme.textMain }}>{gender}</div>
                         </div>
                     </div>
                 </div>
 
-                <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '24px', padding: '36px', backdropFilter: 'blur(16px)', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
-                    <h3 style={{ margin: '0 0 6px 0', fontSize: '20px', fontWeight: '800', letterSpacing: '-0.3px' }}>Password</h3>
+                {/* PASSWORD SECURITY CONTROL CARD */}
+                <div style={{ backgroundColor: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '24px', padding: '36px', backdropFilter: 'blur(16px)', boxShadow: isDarkMode ? '0 20px 40px rgba(0,0,0,0.3)' : '0 20px 40px rgba(15,23,42,0.04)' }}>
+                    <h3 style={{ margin: '0 0 6px 0', fontSize: '20px', fontWeight: '800', letterSpacing: '-0.3px', color: theme.textMain }}>Password</h3>
 
                     {message && <div style={{ fontSize: '13.5px', color: '#34d399', backgroundColor: 'rgba(52, 211, 153, 0.05)', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontWeight: '600', border: '1px solid rgba(52, 211, 153, 0.1)' }}>{message}</div>}
                     {error && <div style={{ fontSize: '13.5px', color: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.05)', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontWeight: '600', border: '1px solid rgba(244, 63, 94, 0.1)' }}>{error}</div>}
 
                     <form onSubmit={handlePasswordUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                         <div>
-                            <label style={{ fontSize: '13px', fontWeight: '700', color: '#cbd5e1' }}>Current Password</label>
+                            <label style={{ fontSize: '13px', fontWeight: '700', color: theme.textMuted }}>Current Password</label>
                             <div style={inputContainerStyle}>
                                 <input 
                                     type={showOldPassword ? "text" : "password"} 
@@ -220,7 +236,7 @@ const Profile = () => {
                         
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
                             <div>
-                                <label style={{ fontSize: '13px', fontWeight: '700', color: '#cbd5e1' }}>New Password</label>
+                                <label style={{ fontSize: '13px', fontWeight: '700', color: theme.textMuted }}>New Password</label>
                                 <div style={inputContainerStyle}>
                                     <input 
                                         type={showNewPassword ? "text" : "password"} 
@@ -236,7 +252,7 @@ const Profile = () => {
                                 </div>
                             </div>
                             <div>
-                                <label style={{ fontSize: '13px', fontWeight: '700', color: '#cbd5e1' }}>Confirm Password</label>
+                                <label style={{ fontSize: '13px', fontWeight: '700', color: theme.textMuted }}>Confirm Password</label>
                                 <div style={inputContainerStyle}>
                                     <input 
                                         type={showConfirmPassword ? "text" : "password"} 
